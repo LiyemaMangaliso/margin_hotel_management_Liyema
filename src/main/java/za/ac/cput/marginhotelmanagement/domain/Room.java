@@ -1,5 +1,8 @@
 package za.ac.cput.marginhotelmanagement.domain;
 
+import za.ac.cput.marginhotelmanagement.enums.RoomStatus;
+import za.ac.cput.marginhotelmanagement.enums.RoomType;
+
 public class Room {
 
     private final String roomId;

@@ -48,7 +48,7 @@ public class Payment {
     public String toString() {
         return "Payment{" +
                 "paymentId=" + paymentId +
-                ", invoiceId=" + invoice.getInvoice() +
+                ", invoiceId=" + invoice +
                 ", amount=" + amount +
                 ", paymentStatus=" + paymentStatus +
                 ", paymentDate=" + paymentDate +
@@ -60,6 +60,7 @@ public class Payment {
         private double amount;
         private PaymentStatus paymentStatus;
         private LocalDateTime paymentDate;
+        private Invoice invoice;
 
         public Builder setPaymentId(Long paymentId){
             this.paymentId = paymentId;
