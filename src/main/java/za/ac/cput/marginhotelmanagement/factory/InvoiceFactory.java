@@ -1,5 +1,9 @@
 package za.ac.cput.marginhotelmanagement.factory;
 
+/*
+    Author: MS MALAPILE (222904267)
+    Date: 27 June 2026
+ */
 import za.ac.cput.marginhotelmanagement.domain.Booking;
 import za.ac.cput.marginhotelmanagement.domain.Invoice;
 import za.ac.cput.marginhotelmanagement.enums.InvoiceStatus;

@@ -16,7 +16,7 @@ public class Booking {
     private Guest guest;
     private Room room;
 
-    private Booking() {
+    public Booking() {
     }
     public Booking(Builder builder) {
         this.bookingId = builder.bookingId;
