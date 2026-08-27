@@ -11,6 +11,7 @@ import za.ac.cput.marginhotelmanagement.domain.Payment;
 import za.ac.cput.marginhotelmanagement.dtos.CreatePaymentRequest;
 import za.ac.cput.marginhotelmanagement.dtos.PaymentDto;
 import za.ac.cput.marginhotelmanagement.dtos.UpdatePaymentRequest;
+import za.ac.cput.marginhotelmanagement.enums.InvoiceStatus;
 import za.ac.cput.marginhotelmanagement.enums.PaymentStatus;
 import za.ac.cput.marginhotelmanagement.mappers.PaymentMapper;
 import za.ac.cput.marginhotelmanagement.repository.PaymentRepository;
@@ -85,7 +86,7 @@ public class PaymentService implements IPaymentService {
 
     public PaymentDto createPayment(CreatePaymentRequest request) {
         validate(request);
-        Invoice invoice = invoiceService.read(request.getInvoiceId());
+        Invoice invoice = resolveInvoice(request.getInvoiceId());
         Payment mapped = paymentMapper.toEntity(request);
         Payment payment = new Payment.Builder()
                 .copy(mapped)
@@ -94,6 +95,7 @@ public class PaymentService implements IPaymentService {
                 .build();
 
         Payment savedPayment = this.paymentRepository.save(payment);
+        syncInvoiceStatus(invoice, savedPayment.getPaymentStatus());
         return paymentMapper.toDto(savedPayment);
     }
 
@@ -115,11 +117,13 @@ public class PaymentService implements IPaymentService {
             throw new IllegalArgumentException("Payment status is required!");
         }
         //Only the status changes
+        PaymentStatus newStatus = PaymentStatus.valueOf(request.getPaymentStatus());
         Payment updatedPayment = new Payment.Builder()
                 .copy(payment)
-                .setPaymentStatus(PaymentStatus.valueOf(request.getPaymentStatus()))
+                .setPaymentStatus(newStatus)
                 .build();
         Payment savedPayment = this.paymentRepository.save(updatedPayment);
+        syncInvoiceStatus(savedPayment.getInvoice(), newStatus);
         return paymentMapper.toDto(savedPayment);
     }
 
@@ -165,10 +169,28 @@ public class PaymentService implements IPaymentService {
         if (!Helper.isValidAmount(request.getAmount())) {
             throw new IllegalArgumentException("Amount must be greater than R0");
         }
-        if (!Helper.isNullOrEmpty(request.getPaymentStatus())) {
+        if (Helper.isNullOrEmpty(request.getPaymentStatus())) {
             throw new IllegalArgumentException("Payment status is required!");
         }
     }
+    // Keeps the linked invoice's status in sync whenever a payment's status
+    // is set — on create and on update. SUCCESS marks the invoice PAID;
+    // anything else (FAILED) puts it back to PENDING, since the invoice is
+    // still awaiting a successful payment.
+    private void syncInvoiceStatus(Invoice invoice, PaymentStatus paymentStatus) {
+        if (invoice == null || paymentStatus == null) {
+            return;
+        }
+        InvoiceStatus newInvoiceStatus = (paymentStatus == PaymentStatus.SUCCESS)
+                ? InvoiceStatus.PAID
+                : InvoiceStatus.PENDING;
+        Invoice updatedInvoice = new Invoice.Builder()
+                .copy(invoice)
+                .setStatus(newInvoiceStatus)
+                .build();
+        invoiceService.update(updatedInvoice);
+    }
+
     private Invoice resolveInvoice(Long invoiceId) {
         if (Helper.isNullOrEmpty(invoiceId)) {
             throw new IllegalArgumentException("Invoice ID is required");

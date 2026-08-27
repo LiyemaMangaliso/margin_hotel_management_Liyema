@@ -80,7 +80,7 @@ public class BookingService implements IBookingService {
 
     @Override
     public boolean isRoomAvailable(Long roomId, LocalDate checkInDate, LocalDate checkOutDate) {
-        List<Booking> roomBookings = bookingRepository.findByRoomId(roomId);
+        List<Booking> roomBookings = bookingRepository.findByRoom_RoomId(roomId);
         return Helper.isRoomAvailable(roomBookings, checkInDate, checkOutDate);
     }
 }

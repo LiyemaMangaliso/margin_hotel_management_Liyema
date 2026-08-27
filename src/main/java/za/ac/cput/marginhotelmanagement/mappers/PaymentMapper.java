@@ -18,8 +18,15 @@ import za.ac.cput.marginhotelmanagement.dtos.PaymentDto;
 
 @Mapper(componentModel = "spring")
 public interface PaymentMapper {
+    // "invoice" and "paymentDate" are set explicitly in PaymentService, not
+    // from the request. "paymentId" is DB-generated. "copy" isn't a real
+    // property — MapStruct's builder introspection just sees
+    // Payment.Builder.copy(Payment) and treats it like one; ignoring it here
+    // just silences that false-positive "unmapped target property" warning.
     @Mapping(target = "invoice", ignore = true)
     @Mapping(target = "paymentDate", ignore = true)
+    @Mapping(target = "paymentId", ignore = true)
+    @Mapping(target = "copy", ignore = true)
     Payment toEntity(CreatePaymentRequest request);
 
     @Mapping(source = "invoice.invoiceId", target = "invoiceId")
