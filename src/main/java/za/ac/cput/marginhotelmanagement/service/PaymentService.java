@@ -173,10 +173,7 @@ public class PaymentService implements IPaymentService {
             throw new IllegalArgumentException("Payment status is required!");
         }
     }
-    // Keeps the linked invoice's status in sync whenever a payment's status
-    // is set — on create and on update. SUCCESS marks the invoice PAID;
-    // anything else (FAILED) puts it back to PENDING, since the invoice is
-    // still awaiting a successful payment.
+    // Keeps the linked invoice's status in sync whenever a payment's status is set — on create and on update.
     private void syncInvoiceStatus(Invoice invoice, PaymentStatus paymentStatus) {
         if (invoice == null || paymentStatus == null) {
             return;
