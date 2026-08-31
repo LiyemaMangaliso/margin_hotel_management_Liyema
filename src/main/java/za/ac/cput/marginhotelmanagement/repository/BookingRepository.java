@@ -27,7 +27,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                         "AND b.stayPeriod.checkInDate < :checkOutDate " +
                         "AND b.stayPeriod.checkOutDate > :checkInDate")
         List<Booking> findOverlappingBookings(
-                        @Param("roomId") String roomId,
+                        @Param("roomId") Long roomId,
                         @Param("checkInDate") LocalDateTime checkInDate,
                         @Param("checkOutDate") LocalDateTime checkOutDate);
 
@@ -36,10 +36,13 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                         "AND b.stayPeriod.checkInDate < :checkOutDate " +
                         "AND b.stayPeriod.checkOutDate > :checkInDate")
         long countOverlappingBookings(
-                        @Param("roomId") String roomId,
+                        @Param("roomId") Long roomId,
                         @Param("checkInDate") LocalDateTime checkInDate,
                         @Param("checkOutDate") LocalDateTime checkOutDate);
 
-        // Simple finder by room id
-        List<Booking> findByRoomId(String roomId);
+        // Simple finder by room id — underscore needed because Room's id
+        // field is called "roomId", not "id" (same reason findByGuest_GuestId
+        // above needs one). Without it, Spring Data tries to resolve a
+        // property literally named "id" on Room and fails at boot.
+        List<Booking> findByRoom_RoomId(Long roomId);
 }

@@ -1,10 +1,13 @@
 package za.ac.cput.marginhotelmanagement.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import za.ac.cput.marginhotelmanagement.domain.Room;
-import za.ac.cput.marginhotelmanagement.repository.RoomRepository;
 import za.ac.cput.marginhotelmanagement.enums.RoomStatus;
+import za.ac.cput.marginhotelmanagement.repository.RoomRepository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -12,6 +15,7 @@ public class RoomService implements IRoomService {
 
     private final RoomRepository roomRepository;
 
+    @Autowired
     public RoomService(RoomRepository roomRepository) {
         this.roomRepository = roomRepository;
     }
@@ -45,7 +49,7 @@ public class RoomService implements IRoomService {
 
     @Override
     public boolean delete(Room room) {
-        if (room != null && room.getRoomId() != null && roomRepository.existsById(room.getRoomId())) {
+        if (room != null && roomRepository.existsById(room.getRoomId())) {
             roomRepository.delete(room);
             return !roomRepository.existsById(room.getRoomId());
         }
@@ -53,10 +57,15 @@ public class RoomService implements IRoomService {
     }
 
     @Override
-    public boolean deleteById(Long roomId) {
-        if (roomId != null && roomRepository.existsById(roomId)) {
-            roomRepository.deleteById(roomId);
-            return !roomRepository.existsById(roomId);
+    public List<Room> getRoomByStatus(RoomStatus status) {
+        return roomRepository.findByRoomStatus(status);
+    }
+
+    //Called from BookingController.create() — that's the separate double-booking
+    @Override
+    public List<Room> findAvailableRooms(LocalDate checkInDate, LocalDate checkOutDate) {
+        if (checkInDate == null || checkOutDate == null || !checkInDate.isBefore(checkOutDate)) {
+            return List.of();
         }
         return false;
     }
